@@ -21,27 +21,20 @@
             text-align: center;
             border: none;           
             transition: background-color 0.2s; 
-            color: #fff; /* <-- 確保文字顏色是白色 */
-            line-height: 1.5; /* <-- 增加行高，防止文字貼邊 */
+            color: #fff; 
+            line-height: 1.5; 
         }
         /* --- 修改結束 --- */
 
         /* --- body 樣式 --- */
         body {
             font-family: Arial, sans-serif;
-            
-            /* --- 移除 background-image 這一行 --- */
-            /* background-image: url('https://www.loliapi.com/acg/'); */ 
-            
-            /* --- 保留以下屬性 --- */
             background-size: cover;       
             background-position: center;  
             background-repeat: no-repeat; 
             background-attachment: fixed; 
             height: 100vh; 
             margin: 0;     
-
-            /* --- 居中 --- */
             display: flex;
             justify-content: center; 
             align-items: center;   
@@ -69,42 +62,35 @@
             display: none;
         }
 
-        /* --- .custom-file-label (選擇文件按鈕 specifico) --- */
+        /* --- .custom-file-label --- */
         .custom-file-label {
             background-color: #003d74;
-            /* 樣式已移到 #uploadFileLabel */
         }
-        /* --- 修改結束 --- */
 
         .custom-file-label:hover {
             background-color: #12507b;
         }
 
-        /* --- #uploadButton (上傳按鈕 specifico) --- */
+        /* --- #uploadButton --- */
         #uploadButton {
             background-color: #0F1423;
-             /* 樣式已移到 #uploadButton */
         }
-        /* --- 修改結束 --- */
         
-        /* --- #uploadButton[disabled] (禁用時的上傳按鈕) --- */
+        /* --- #uploadButton[disabled] --- */
         #uploadButton[disabled] {
-            /* background-color: #ccc; */ /* <-- 移除舊的灰色 */
-            background-color: #5a5e6b; /* <-- 使用較淺的深灰色 */
+            background-color: #4a4d56ff; 
             cursor: not-allowed;
-            color: #ccc; /* <-- 讓文字顏色也變淺 */
+            color: #ccc; 
         }
-        /* --- 修改結束 --- */
 
         #uploadButton:hover {
             background-color: #12507b;
         }
         
-        /* --- 禁用按鈕的 hover 狀態 (防止變色) --- */
+        /* --- 禁用按鈕的 hover 狀態 --- */
         #uploadButton[disabled]:hover {
-             background-color: #5a5e6b; /* 保持禁用時的顏色 */
+             background-color: #464954ff; 
         }
-        /* --- 新增結束 --- */
 
         #response {
             margin-top: 20px;
@@ -117,19 +103,17 @@
             border-radius: 5px;
         }
 
-        /* --- 修改 .response-success --- */
+        /* --- .response-success --- */
         .response-success {
             background-color: rgba(255, 255, 255, 0.9); 
             border: 1px solid #000; 
             color: #13393e; 
             padding: 15px; 
-            /* text-align: left; */ /* <-- 移除靠左 */
-            text-align: center; /* <-- 新增：讓文字居中 */
+            text-align: center; /* <-- 改回居中 */
             border-radius: 5px; 
         }
-        /* --- 修改結束 --- */
 
-        /* --- .response-success a (連結樣式) --- */
+        /* --- .response-success a --- */
         .response-success a {
             color: #003d74; 
             font-weight: bold;
@@ -139,26 +123,29 @@
         .response-success a:hover {
             text-decoration: underline;
         }
-        /* --- 修改結束 --- */
 
+        /* --- 修改 .response-error --- */
         .response-error {
-            background-color: #f8d7da;
-            border-color: #f5c6cb;
-            color: #721c24;
+            /* background-color: #f8d7da; */ /* <-- 移除舊背景 */
+            /* border-color: #f5c6cb; */ /* <-- 舊邊框色 */
+            background-color: rgba(255, 255, 255, 0.9); /* <-- 新增：半透明白背景 */
+            border: 1px solid #f5c6cb; /* <-- 新增：紅色邊框 */
+            color: #721c24; 
             border-radius: 5px; 
             padding: 15px; 
+            text-align: center; /* <-- 新增：文字居中 */
         }
+        /* --- 修改結束 --- */
 
-        /* --- #loading (上傳中文字) --- */
+        /* --- #loading --- */
         #loading {
             display: none;
             margin-top: 10px; 
-            color: #494646ff;     
+            color: #555;     
             font-size: 0.9em;
         }
-        /* --- 修改結束 --- */
 
-        /* --- .copy-code (按鈕) 樣式 --- */
+        /* --- .copy-code (按鈕) --- */
         .copy-code {
             display: inline-block;
             background-color: #0F1423; 
@@ -170,21 +157,20 @@
             cursor: pointer;
             transition: background-color 0.2s; 
         }
-        /* --- 修改結束 --- */
 
         .copy-code:hover {
             background-color: #12507b; 
         }
         
-        /* --- 按鈕容器樣式 --- */
+        /* --- 按鈕容器 .all-copy-buttons --- */
         .all-copy-buttons {
             display: flex; 
             flex-wrap: wrap; 
-            justify-content: center; /* <-- 新增：讓按鈕居中 */
+            justify-content: center; /* <-- 按鈕居中 */
             margin-top: 15px; 
         }
-        /* --- 新增/修改結束 --- */
 
+        /* --- 密碼頁面樣式 --- */
         .password {
             margin: 0;
             padding: 0;
@@ -222,6 +208,7 @@
             cursor: pointer;
  }
 
+        /* --- RWD --- */
         @media (max-width: 465px) {
             .form-container {
                 padding: 0;
