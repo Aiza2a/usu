@@ -29,12 +29,19 @@
         /* --- body 樣式 --- */
         body {
             font-family: Arial, sans-serif;
+            
+            /* --- 移除 background-image 這一行 --- */
+            /* background-image: url('https://www.loliapi.com/acg/'); */ 
+            
+            /* --- 保留以下屬性 --- */
             background-size: cover;       
             background-position: center;  
             background-repeat: no-repeat; 
             background-attachment: fixed; 
             height: 100vh; 
             margin: 0;     
+
+            /* --- 居中 --- */
             display: flex;
             justify-content: center; 
             align-items: center;   
@@ -80,7 +87,7 @@
         }
         /* --- 修改結束 --- */
         
-        /* --- 修改 #uploadButton[disabled] (禁用時的上傳按鈕) --- */
+        /* --- #uploadButton[disabled] (禁用時的上傳按鈕) --- */
         #uploadButton[disabled] {
             /* background-color: #ccc; */ /* <-- 移除舊的灰色 */
             background-color: #5a5e6b; /* <-- 使用較淺的深灰色 */
@@ -93,7 +100,7 @@
             background-color: #12507b;
         }
         
-        /* --- 新增: 禁用按鈕的 hover 狀態 (防止變色) --- */
+        /* --- 禁用按鈕的 hover 狀態 (防止變色) --- */
         #uploadButton[disabled]:hover {
              background-color: #5a5e6b; /* 保持禁用時的顏色 */
         }
@@ -110,13 +117,14 @@
             border-radius: 5px;
         }
 
-        /* --- .response-success --- */
+        /* --- 修改 .response-success --- */
         .response-success {
             background-color: rgba(255, 255, 255, 0.9); 
             border: 1px solid #000; 
             color: #13393e; 
             padding: 15px; 
-            text-align: left; 
+            /* text-align: left; */ /* <-- 移除靠左 */
+            text-align: center; /* <-- 新增：讓文字居中 */
             border-radius: 5px; 
         }
         /* --- 修改結束 --- */
@@ -141,11 +149,11 @@
             padding: 15px; 
         }
 
-        /* --- 修改 #loading (上傳中文字) --- */
+        /* --- #loading (上傳中文字) --- */
         #loading {
             display: none;
-            margin-top: 10px; /* <-- 增加與上方按鈕的間距 */
-            color: #4e4c4cff;     /* <-- 使用稍微深一點的灰色 */
+            margin-top: 10px; 
+            color: #494646ff;     
             font-size: 0.9em;
         }
         /* --- 修改結束 --- */
@@ -172,6 +180,7 @@
         .all-copy-buttons {
             display: flex; 
             flex-wrap: wrap; 
+            justify-content: center; /* <-- 新增：讓按鈕居中 */
             margin-top: 15px; 
         }
         /* --- 新增/修改結束 --- */
@@ -226,7 +235,7 @@
                 width: 90%; 
             }
             #uploadButton, #uploadFileLabel {
-                 padding: 10px 15px; /* 小螢幕上按鈕稍微小一點 */
+                 padding: 10px 15px; 
                  font-size: 0.95em;
             }
         }
