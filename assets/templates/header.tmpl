@@ -3,10 +3,10 @@
 <html>
 <head>
     <meta charset="UTF-8" />
-    <title>薄 水</title>
+    <title>夕 凪</title>
     <meta name="keywords"
-        content="藍沢の图床" />
-    <meta name="description" content="藍沢の图床" />
+        content="破壊的価値創造" />
+    <meta name="description" content="破壊的価値創造" />
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
     <style>
         #uploadButton,
@@ -20,10 +20,11 @@
         /* --- 修改 body 樣式 --- */
         body {
             font-family: Arial, sans-serif;
-            /* text-align: center; */ /* <-- 舊的: 移除這一行 */
-
-            /* --- 新增 (隨機背景) --- */
-            background-image: url('https://www.loliapi.com/acg/');
+            
+            /* --- 刪除 background-image 這一行 --- */
+            /* background-image: url('https://www.loliapi.com/acg/'); */ /* <-- 刪除這一行 */
+            
+            /* --- 保留以下屬性 --- */
             background-size: cover;       /* 讓圖片鋪滿整個螢幕 */
             background-position: center;  /* 圖片置中 */
             background-repeat: no-repeat; /* 圖片不重複 */
@@ -43,8 +44,7 @@
             color: #13393e;
         }
 
-        /* --- 新增 .content-box 樣式 --- */
-        /* 這是用來放上傳元件的 "內容框" */
+        /* --- .content-box 樣式 --- */
         .content-box {
             background-color: rgba(255, 255, 255, 0.85); /* 半透明白色背景，確保可讀性 */
             padding: 30px;
@@ -54,7 +54,6 @@
             max-width: 90%;
             width: 400px; /* 給一個固定寬度，你可以自己調整 */
         }
-        /* --- 新增結束 --- */
 
         .custom-file-input {
             display: none;
@@ -100,11 +99,25 @@
             border-radius: 5px;
         }
 
+        /* --- 修改 .response-success --- */
         .response-success {
-            background-color: #d4edda;
-            border-color: #c3e6cb;
-            color: #66C18C;
+            background-color: rgba(255, 255, 255, 0.9); 
+            border: 1px solid #66C18C; 
+            color: #13393e; 
+            word-wrap: break-word; /* 確保長連結會自動換行 */
         }
+        /* --- 修改結束 --- */
+
+        /* --- 新增 .response-success a (連結樣式) --- */
+        .response-success a {
+            color: #003d74; /* 使用按鈕的深藍色 */
+            font-weight: bold;
+            text-decoration: none;
+        }
+        .response-success a:hover {
+            text-decoration: underline;
+        }
+        /* --- 新增結束 --- */
 
         .response-error {
             background-color: #f8d7da;
@@ -116,13 +129,31 @@
             display: none;
         }
 
+        /* --- 修改 .copy-code (HTML/Markdown/BBCode) --- */
         .copy-code {
-            margin: 5px;
+            display: inline-block;
+            background-color: #0F1423; /* 和「上傳」按鈕一樣的背景色 */
+            color: #fff;
+            padding: 4px 10px;
+            margin: 5px 3px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: background-color 0.2s; /* 平滑的 hover 過渡效果 */
         }
+        /* --- 修改結束 --- */
 
-        .copy-links {
-            margin-top: 5px;
+        /* --- 新增 .copy-code:hover (按鈕 hover 效果) --- */
+        .copy-code:hover {
+            background-color: #12507b; /* 和按鈕一樣的 hover 顏色 */
         }
+        /* --- 新增結束 --- */
+
+        /* --- 修改 .copy-links --- */
+        .copy-links {
+            margin-top: 10px; /* 增加一點上方距離 */
+        }
+        /* --- 修改結束 --- */
 
         #uploadButton[disabled]:hover {
             background-color: #ccc;
