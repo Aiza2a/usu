@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"csz.net/tgstate/conf"
+	"csz.net/tgstate/store" // <-- 1. 匯入 store 套件
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
@@ -99,7 +100,20 @@ func BotDo() {
 				fileID = msg.ReplyToMessage.Sticker.FileID
 			}
 			if fileID != "" {
-				newMsg := tgbotapi.NewMessage(msg.Chat.ID, strings.TrimSuffix(conf.BaseUrl, "/")+"/d/"+fileID)
+				// <-- 2. 修改開始 -->
+				// 為 FileID 產生或獲取 shortID
+				shortID, err := store.GenerateAndSave(fileID)
+				var replyText string
+				if err != nil {
+					log.Printf("為 'get' 命令建立 shortID 失敗: %v", err)
+					replyText = "建立短連結失敗"
+				} else {
+					replyText = strings.TrimSuffix(conf.BaseUrl, "/") + "/d/" + shortID
+				}
+
+				newMsg := tgbotapi.NewMessage(msg.Chat.ID, replyText)
+				// <-- 修改結束 -->
+
 				newMsg.ReplyToMessageID = msg.MessageID
 				if !strings.HasPrefix(conf.ChannelName, "@") {
 					if man, err := strconv.Atoi(conf.ChannelName); err == nil && int(msg.Chat.ID) == man {
