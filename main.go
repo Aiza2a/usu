@@ -9,7 +9,10 @@ import (
 
 	"csz.net/tgstate/conf"
 	"csz.net/tgstate/control"
+	"csz.net/tgstate/store" // <-- 1. 匯入 store 套件
 	"csz.net/tgstate/utils"
+
+	_ "github.com/mattn/go-sqlite3" // <-- 2. 匯入 sqlite3 驅動
 )
 
 var webPort string
@@ -21,6 +24,11 @@ func main() {
 		fmt.Println("请先设置Bot Token和对象")
 		return
 	}
+
+	// <-- 3. 初始化資料庫
+	// 資料庫檔案將被建立在程式執行的同一個目錄下
+	store.InitDB("./tgstate.db")
+
 	go utils.BotDo()
 	web()
 }

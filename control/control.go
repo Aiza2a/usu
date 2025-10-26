@@ -13,6 +13,7 @@ import (
 
 	"csz.net/tgstate/assets"
 	"csz.net/tgstate/conf"
+	"csz.net/tgstate/store" // <-- 1. 匯入 store 套件
 	"csz.net/tgstate/utils"
 )
 
@@ -52,7 +53,26 @@ func UploadImageAPI(w http.ResponseWriter, r *http.Request) {
 			Code:    0,
 			Message: "error",
 		}
-		img := conf.FileRoute + utils.UpDocument(utils.TgFileData(header.Filename, file))
+
+		// <-- 2. 修改開始 -->
+		// 上傳文件到 Telegram 並獲取真實 FileID
+		realFileID := utils.UpDocument(utils.TgFileData(header.Filename, file))
+
+		if realFileID == "" {
+			errJsonMsg("Failed to upload file to Telegram", w)
+			return
+		}
+
+		// 為這個 FileID 產生或獲取一個短 ID
+		shortID, err := store.GenerateAndSave(realFileID)
+		if err != nil {
+			log.Printf("無法建立 short ID: %v", err)
+			errJsonMsg("Failed to create short ID", w)
+			return
+		}
+
+		// 使用 shortID 構造返回的連結
+		img := conf.FileRoute + shortID
 		if img != conf.FileRoute {
 			res = conf.UploadResponse{
 				Code:    1,
@@ -60,6 +80,8 @@ func UploadImageAPI(w http.ResponseWriter, r *http.Request) {
 				ImgUrl:  strings.TrimSuffix(conf.BaseUrl, "/") + img,
 			}
 		}
+		// <-- 修改結束 -->
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(res)
@@ -81,8 +103,10 @@ func errJsonMsg(msg string, w http.ResponseWriter) {
 }
 func D(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
-	id := strings.TrimPrefix(path, conf.FileRoute)
-	if id == "" {
+	// <-- 3. 修改開始 -->
+	// 現在獲取到的是 shortID
+	shortID := strings.TrimPrefix(path, conf.FileRoute)
+	if shortID == "" {
 		// 设置响应的状态码为 404
 		w.WriteHeader(http.StatusNotFound)
 		// 写入响应内容
@@ -90,8 +114,20 @@ func D(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// 透過 shortID 查詢真實的 FileID
+	realFileID, err := store.GetFileID(shortID)
+	if err != nil {
+		log.Printf("查詢 FileID 失敗 (shortID: %s): %v", shortID, err)
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("404 Not Found: Invalid ID"))
+		return
+	}
+
+	// 使用 realFileID 獲取下載連結
+	fileUrl, _ := utils.GetDownloadUrl(realFileID)
+	// <-- 修改結束 -->
+
 	// 发起HTTP GET请求来获取Telegram图片
-	fileUrl, _ := utils.GetDownloadUrl(id)
 	resp, err := http.Get(fileUrl)
 	if err != nil {
 		http.Error(w, "Failed to fetch content", http.StatusInternalServerError)
@@ -139,7 +175,24 @@ func D(w http.ResponseWriter, r *http.Request) {
 					time.Sleep(5 * time.Second)
 				}
 				reTry = reTry + 1
-				fileUrl, fileStatus = utils.GetDownloadUrl(strings.ReplaceAll(lines[i], " ", ""))
+				
+				// <-- 4. 關鍵修改 (分塊下載) -->
+				// 分塊檔案的清單 (fileAll.txt) 中儲存的也應該是 shortID
+				chunkShortID := strings.ReplaceAll(lines[i], " ", "")
+				if chunkShortID == "" {
+					continue
+				}
+
+				// 查詢分塊的真實 FileID
+				chunkRealFileID, err := store.GetFileID(chunkShortID)
+				if err != nil {
+					log.Printf("找不到分塊 FileID (shortID: %s): %v", chunkShortID, err)
+					http.Error(w, "Failed to fetch content (invalid chunk)", http.StatusInternalServerError)
+					return
+				}
+				// 使用真實 FileID 獲取下載連結
+				fileUrl, fileStatus = utils.GetDownloadUrl(chunkRealFileID)
+				// <-- 修改結束 -->
 			}
 			blobResp, err := http.Get(fileUrl)
 			if err != nil {
