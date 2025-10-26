@@ -9,156 +9,172 @@
     <meta name="description" content="破壊的価値創造" />
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
     <style>
+        /* --- 主按鈕樣式 (選擇文件 & 上傳) --- */
         #uploadButton,
         #uploadFileLabel {
-            display: block;
- max-width: 200px;
-            margin: 0 auto;
-            margin-bottom: 10px;
+            display: inline-block; 
+            margin: 0 auto 15px auto; 
+            padding: 12px 25px;      
+            border-radius: 8px;     
+            font-size: 1em;         
+            cursor: pointer;
+            text-align: center;
+            border: none;           
+            transition: background-color 0.2s; 
+            color: #fff; /* <-- 確保文字顏色是白色 */
+            line-height: 1.5; /* <-- 增加行高，防止文字貼邊 */
         }
+        /* --- 修改結束 --- */
 
-        /* --- 修改 body 樣式 --- */
+        /* --- body 樣式 --- */
         body {
             font-family: Arial, sans-serif;
-            
-            /* --- 刪除 background-image 這一行 --- */
-            /* background-image: url('https://www.loliapi.com/acg/'); */ /* <-- 刪除這一行 */
-            
-            /* --- 保留以下屬性 --- */
-            background-size: cover;       /* 讓圖片鋪滿整個螢幕 */
-            background-position: center;  /* 圖片置中 */
-            background-repeat: no-repeat; /* 圖片不重複 */
-            background-attachment: fixed; /* 背景圖片固定，不隨捲動滾動 */
-            height: 100vh; /* 讓 body 佔滿整個視窗高度 */
-            margin: 0;     /* 移除 body 的預設邊距 */
-
-            /* --- 新增 (居中) --- */
+            background-size: cover;       
+            background-position: center;  
+            background-repeat: no-repeat; 
+            background-attachment: fixed; 
+            height: 100vh; 
+            margin: 0;     
             display: flex;
-            justify-content: center; /* 水平居中 */
-            align-items: center;   /* 垂直居中 */
+            justify-content: center; 
+            align-items: center;   
         }
         /* --- 修改結束 --- */
 
 
         h1 {
             color: #13393e;
+            margin-bottom: 25px; 
         }
 
         /* --- .content-box 樣式 --- */
         .content-box {
-            background-color: rgba(255, 255, 255, 0.85); /* 半透明白色背景，確保可讀性 */
+            background-color: rgba(255, 255, 255, 0.85); 
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            text-align: center; /* <-- 把 text-align 移到這裡 */
+            text-align: center; 
             max-width: 90%;
-            width: 400px; /* 給一個固定寬度，你可以自己調整 */
+            width: 400px; 
         }
 
         .custom-file-input {
             display: none;
         }
 
+        /* --- .custom-file-label (選擇文件按鈕 specifico) --- */
         .custom-file-label {
             background-color: #003d74;
-            color: #fff;
-            padding: 10px 20px;
-            border: 2px solid #feeeed90;
-            cursor: pointer;
- }
+            /* 樣式已移到 #uploadFileLabel */
+        }
+        /* --- 修改結束 --- */
 
         .custom-file-label:hover {
             background-color: #12507b;
         }
 
+        /* --- #uploadButton (上傳按鈕 specifico) --- */
         #uploadButton {
             background-color: #0F1423;
-            color: #fff;
-            padding: 10px 20px;
-            border: 2px solid #feeeed90;
-            cursor: pointer;
- }
-
-        #uploadButton[disabled] {
-            background-color: #ccc;
-            cursor: not-allowed;
+             /* 樣式已移到 #uploadButton */
         }
+        /* --- 修改結束 --- */
+        
+        /* --- 修改 #uploadButton[disabled] (禁用時的上傳按鈕) --- */
+        #uploadButton[disabled] {
+            /* background-color: #ccc; */ /* <-- 移除舊的灰色 */
+            background-color: #5a5e6b; /* <-- 使用較淺的深灰色 */
+            cursor: not-allowed;
+            color: #ccc; /* <-- 讓文字顏色也變淺 */
+        }
+        /* --- 修改結束 --- */
 
         #uploadButton:hover {
             background-color: #12507b;
         }
+        
+        /* --- 新增: 禁用按鈕的 hover 狀態 (防止變色) --- */
+        #uploadButton[disabled]:hover {
+             background-color: #5a5e6b; /* 保持禁用時的顏色 */
+        }
+        /* --- 新增結束 --- */
 
         #response {
             margin-top: 20px;
- padding: 10px;
+            padding: 0; 
         }
 
         .response-item {
             margin-bottom: 10px;
- padding: 10px;
+            padding: 0; 
             border-radius: 5px;
         }
 
-        /* --- 修改 .response-success --- */
+        /* --- .response-success --- */
         .response-success {
             background-color: rgba(255, 255, 255, 0.9); 
             border: 1px solid #000; 
             color: #13393e; 
-            word-wrap: break-word; /* 確保長連結會自動換行 */
+            padding: 15px; 
+            text-align: left; 
+            border-radius: 5px; 
         }
         /* --- 修改結束 --- */
 
-        /* --- 新增 .response-success a (連結樣式) --- */
+        /* --- .response-success a (連結樣式) --- */
         .response-success a {
-            color: #003d74; /* 使用按鈕的深藍色 */
+            color: #003d74; 
             font-weight: bold;
             text-decoration: none;
+            word-break: break-all; 
         }
         .response-success a:hover {
             text-decoration: underline;
         }
-        /* --- 新增結束 --- */
+        /* --- 修改結束 --- */
 
         .response-error {
             background-color: #f8d7da;
             border-color: #f5c6cb;
             color: #721c24;
+            border-radius: 5px; 
+            padding: 15px; 
         }
 
+        /* --- 修改 #loading (上傳中文字) --- */
         #loading {
             display: none;
+            margin-top: 10px; /* <-- 增加與上方按鈕的間距 */
+            color: #4e4c4cff;     /* <-- 使用稍微深一點的灰色 */
+            font-size: 0.9em;
         }
+        /* --- 修改結束 --- */
 
-        /* --- 修改 .copy-code (HTML/Markdown/BBCode) --- */
+        /* --- .copy-code (按鈕) 樣式 --- */
         .copy-code {
             display: inline-block;
-            background-color: #0F1423; /* 和「上傳」按鈕一樣的背景色 */
+            background-color: #0F1423; 
             color: #fff;
-            padding: 4px 10px;
-            margin: 5px 3px;
+            padding: 5px 12px; 
+            margin: 5px 4px; 
             border-radius: 4px;
             font-size: 0.9em;
             cursor: pointer;
-            transition: background-color 0.2s; /* 平滑的 hover 過渡效果 */
+            transition: background-color 0.2s; 
         }
         /* --- 修改結束 --- */
 
-        /* --- 新增 .copy-code:hover (按鈕 hover 效果) --- */
         .copy-code:hover {
-            background-color: #12507b; /* 和按鈕一樣的 hover 顏色 */
+            background-color: #12507b; 
         }
-        /* --- 新增結束 --- */
-
-        /* --- 修改 .copy-links --- */
-        .copy-links {
-            margin-top: 10px; /* 增加一點上方距離 */
+        
+        /* --- 按鈕容器樣式 --- */
+        .all-copy-buttons {
+            display: flex; 
+            flex-wrap: wrap; 
+            margin-top: 15px; 
         }
-        /* --- 修改結束 --- */
-
-        #uploadButton[disabled]:hover {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
+        /* --- 新增/修改結束 --- */
 
         .password {
             margin: 0;
@@ -206,6 +222,13 @@
             .form-input {
                 margin-top: 30px;
  }
+            .content-box {
+                width: 90%; 
+            }
+            #uploadButton, #uploadFileLabel {
+                 padding: 10px 15px; /* 小螢幕上按鈕稍微小一點 */
+                 font-size: 0.95em;
+            }
         }
     </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
