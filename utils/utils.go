@@ -272,4 +272,4 @@ func EditCaption(chatID int64, messageID int, caption string) error {
         log.Printf("成功修改 Caption (ChatID: %d, MessageID: %d)", chatID, messageID)
     }
     return nil 
-}
+} 
