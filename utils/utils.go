@@ -19,7 +19,7 @@ func TgFileData(fileName string, fileData io.Reader) tgbotapi.FileReader {
 		Name:   fileName,
 		Reader: fileData,
 	}
-}
+} // ** Closing brace for func TgFileData **
 
 // UpDocument (This function is unchanged - ensure it returns error)
 func UpDocument(fileData tgbotapi.FileReader) (string, int64, int, error) {
@@ -27,7 +27,7 @@ func UpDocument(fileData tgbotapi.FileReader) (string, int64, int, error) {
 	if err != nil {
 		log.Println(err)
 		return "", 0, 0, err
-	}
+	} // ** Closing brace for if err != nil **
 	params := tgbotapi.Params{
 		"chat_id": conf.ChannelName,
 	}
@@ -41,19 +41,19 @@ func UpDocument(fileData tgbotapi.FileReader) (string, int64, int, error) {
 	if err != nil {
 		log.Println("UploadFiles error:", err)
 		return "", 0, 0, err
-	}
+	} // ** Closing brace for if err != nil **
 	var msg tgbotapi.Message
 	err = json.Unmarshal([]byte(response.Result), &msg)
 	if err != nil {
 		log.Println("Unmarshal error:", err)
 		return "", 0, 0, err
-	}
+	} // ** Closing brace for if err != nil **
 
 	if msg.MessageID == 0 || msg.Chat == nil {
 		errMsg := "未能從 Telegram 響應中獲取 MessageID 或 ChatID"
 		log.Println(errMsg)
 		return "", 0, 0, errors.New(errMsg)
-	}
+	} // ** Closing brace for if msg.MessageID == 0... **
 
 	var resp string
 	switch {
@@ -80,7 +80,7 @@ func GetDownloadUrl(fileID string) (string, bool) {
 	if err != nil {
 		log.Println("NewBotAPI error in GetDownloadUrl:", err)
 		return "", false
-	}
+	} // ** Closing brace for if err != nil **
 	file, err := bot.GetFile(tgbotapi.FileConfig{FileID: fileID})
 	if err != nil {
 		log.Println("获取文件失败【" + fileID + "】")
