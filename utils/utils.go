@@ -69,10 +69,10 @@ func UpDocument(fileData tgbotapi.FileReader) (string, int64, int, error) {
 		errMsg := "Telegram 響應中未找到有效的 FileID"
 		log.Println(errMsg)
 		return "", msg.Chat.ID, msg.MessageID, errors.New(errMsg)
-	}
+	} // ** Closing brace for switch **
 
 	return resp, msg.Chat.ID, msg.MessageID, nil
-}
+} // ** Closing brace for func UpDocument **
 
 // GetDownloadUrl (This function is unchanged)
 func GetDownloadUrl(fileID string) (string, bool) {
@@ -86,11 +86,11 @@ func GetDownloadUrl(fileID string) (string, bool) {
 		log.Println("获取文件失败【" + fileID + "】")
 		log.Println(err)
 		return "", false
-	}
+	} // ** Closing brace for if err != nil **
 	log.Println("获取文件成功【" + fileID + "】")
 	fileURL := file.Link(conf.BotToken)
 	return fileURL, true
-}
+} // ** Closing brace for func GetDownloadUrl **
 
 // --- BotDo Function with correct braces ---
 func BotDo() {
@@ -98,7 +98,7 @@ func BotDo() {
 	if err != nil {
 		log.Println("啟動 Bot 失敗:", err)
 		return
-	}
+	} // ** Closing brace for if err != nil **
 	log.Println("Bot 啟動成功，正在監聽更新...")
 
 	u := tgbotapi.NewUpdate(0)
@@ -114,24 +114,24 @@ func BotDo() {
 			targetUserID = parsedID
 			isTargetUserMode = true
 			log.Printf("Bot 目標設定為特定用戶 ID: %d", targetUserID)
-		} else {
+		} else { // ** Closing brace for if parseErr == nil **
 			log.Printf("警告：ChannelName '%s' 不是有效的用戶 ID，將忽略來自 Bot 的直接上傳。", conf.ChannelName)
-		}
-	} else {
+		} // ** Closing brace for else **
+	} else { // ** Closing brace for if !strings.HasPrefix... **
 		log.Printf("Bot 目標設定為頻道/群組: %s (將忽略來自 Bot 的直接上傳)", conf.ChannelName)
-	}
+	} // ** Closing brace for else **
 
 	for update := range updatesChan {
 		var msg *tgbotapi.Message
 		if update.Message != nil {
 			msg = update.Message
-		} else if update.ChannelPost != nil {
+		} else if update.ChannelPost != nil { // ** Closing brace for if update.Message... **
 			msg = update.ChannelPost
-		}
+		} // ** Closing brace for else if update.ChannelPost... **
 
 		if msg == nil {
 			continue
-		}
+		} // ** Closing brace for if msg == nil **
 
 		// --- Case 1: Handle 'get' command ---
 		if msg.Text == "get" && msg.ReplyToMessage != nil {
@@ -153,11 +153,11 @@ func BotDo() {
 				if isTargetUserMode {
 					if msg.From != nil && msg.From.ID == targetUserID {
 						allowGet = true
-					} else if msg.From != nil {
+					} else if msg.From != nil { // ** Closing brace for if msg.From != nil... **
 						log.Printf("忽略來自非目標用戶 (%d) 的 'get' 命令", msg.From.ID)
-					} else {
+					} else { // ** Closing brace for else if msg.From != nil **
 						log.Printf("忽略來自未知用戶的 'get' 命令 (可能是頻道)")
-					}
+					} // ** Closing brace for else **
 				} else { // ** Closing brace for if isTargetUserMode **
 					allowGet = true // Allow anyone in non-user mode
 				} // ** Closing brace for else **
@@ -181,7 +181,7 @@ func BotDo() {
 					_, errSend := bot.Send(newMsg)
 					if errSend != nil {
 						log.Printf("回覆 'get' 命令失敗 (ChatID: %d): %v", msg.Chat.ID, errSend)
-					}
+					} // ** Closing brace for if errSend != nil **
 				} // ** Closing brace for if allowGet **
 			} // ** Closing brace for if fileID != "" **
 		} // ** Closing brace for if msg.Text == "get" **
@@ -193,7 +193,7 @@ func BotDo() {
 			if isTargetUserMode {
 				if msg.From != nil && msg.From.ID == targetUserID {
 					allowUpload = true
-				} else if msg.From != nil {
+				} else if msg.From != nil { // ** Closing brace for if msg.From != nil... **
 					log.Printf("忽略來自非目標用戶 (%d) 的直接上傳", msg.From.ID)
 				} else { // ** Closing brace for else if msg.From != nil **
 					log.Printf("忽略來自未知用戶的直接上傳 (可能是頻道)")
@@ -233,7 +233,7 @@ func BotDo() {
 					_, errSend := bot.Send(newMsg)
 					if errSend != nil {
 						log.Printf("回覆 Bot 上傳訊息失敗 (ChatID: %d): %v", msg.Chat.ID, errSend)
-					}
+					} // ** Closing brace for if errSend != nil **
 				} // ** Closing brace for if fileID != "" **
 			} // ** Closing brace for if allowUpload **
 		} // ** Closing brace for else if (msg.Photo...) **
@@ -247,7 +247,7 @@ func EditCaption(chatID int64, messageID int, caption string) error {
 	if err != nil {
 		log.Println("NewBotAPI error in EditCaption:", err)
 		return err
-	}
+	} // ** Closing brace for if err != nil **
 	editMsg := tgbotapi.NewEditMessageCaption(chatID, messageID, caption)
 	_, err = bot.Send(editMsg)
 	if err != nil {
