@@ -1,211 +1,221 @@
 {{define "public/footer"}}
 <script>
     function uploadFile(file) {
+        // --- 這部分的 chunking 邏輯不變 ---
         var limit = 10 * 1024 * 1024;
 if (file.size <= limit) {
-            uploadImg(file, 1).then((url) => {
-                // 处理上传成功的情况
-                console.log(url);
-            }).catch((error) => {
-                // 处理上传失败的情况
-                console.error(error);
- 
-           });
-} else {
-            // 文件大于20MB，需要分割成多个块
-            var chunkSize = limit;
-// 20MB
+            // 直接返回 uploadImg Promise
+            return uploadImg(file, 1); // <-- 修改：返回 Promise
+
+        } else {
+            // 文件大于10MB，需要分割成多个块
+            var chunkSize = limit; 
             var start = 0;
 var end = Math.min(chunkSize, file.size);
-            function uploadNextChunk() {
-                if (start < file.size) {
-                    var chunk = file.slice(start, end);
-return uploadImg(chunk, 0)
-                        .then((url) => {
-                            // 处理上传成功的情况
-                            temp = temp + '\n' + url.replace(/^\/d\//, ''); // 每次改变值都换行
-      
-                      start = end;
-                            end = Math.min(start + chunkSize, file.size);
-                            return uploadNextChunk(); // 上传下一个块
             
-            })
-                        .catch((error) => {
-                            // 处理上传失败的情况
-                            console.error(error);
-     
-                       var t = $('<div class="response-item response-error">上传失败(' + e.message + ')</div>');
-                            $("#response").prepend(t);
-                            return Promise.reject("Upload failed"); // 终止上传
-        
-                });
+            // 使用 Promise 鏈來處理分塊
+            return new Promise((resolveOuter, rejectOuter) => { // <-- 修改：返回 Promise
+                var temp = "tgstate-blob";
+temp = temp + '\n' + file.name;
+                temp = temp + '\nsize' + file.size;
+
+                function uploadNextChunk() {
+                    if (start < file.size) {
+                        var chunk = file.slice(start, end);
+return uploadImg(chunk, 0)
+                            .then((url) => {
+                                temp = temp + '\n' + url.replace(/^\/d\//, ''); 
+
+                                start = end;
+                                end = Math.min(start + chunkSize, file.size);
+                                return uploadNextChunk(); // 遞迴上傳下一個塊
+
+                            })
+                            // 注意：這裡的 catch 只處理當前 chunk 的 uploadImg 失敗
+                            .catch((error) => { 
+                                console.error("Chunk upload error:", error);
+
+                                var t = $('<div class="response-item response-error">分塊上傳失敗(' + file.name + ')</div>');
+                                $("#response").prepend(t);
+                                throw new Error("Chunk upload failed for " + file.name); // <-- 修改：拋出錯誤以停止 Promise 鏈
+
+                            });
 } else {
-                    return Promise.resolve();
-// 如果所有块都上传完成，返回一个已解决的 Promise
+                        // 所有分塊上傳完成 (除了 fileAll.txt)
+                        return Promise.resolve(); 
+
+                    }
                 }
 
-            }
-            var temp = "tgstate-blob";
-temp = temp + '\n' + file.name;
-            temp = temp + '\nsize' + file.size;
-uploadNextChunk()
-                .then(() => {
-                    console.log(temp); // 所有块上传完成后打印
-                    // 将字符串转换为 Blob 对象
-                    var blob = new Blob([temp], { type: 'text/plain' });
-         
-           var fileAll = new File([blob], 'fileAll.txt', { type: 'text/plain' });
-                    return uploadImg(fileAll, 1);
-                })
-                .catch((error) => {
-                    // 处理上传失败的情况
-   
-                 console.error(error);
-                });
+                uploadNextChunk()
+                    .then(() => {
+                        // 所有分塊成功後，上傳包含 ID 列表的 fileAll.txt
+                        console.log(temp); 
+                        var blob = new Blob([temp], { type: 'text/plain' });
+
+                        var fileAll = new File([blob], 'fileAll.txt', { type: 'text/plain' });
+                        // 返回最終的 uploadImg Promise
+                        return uploadImg(fileAll, 1); 
+                    })
+                    .then(resolveOuter) // <-- 最終成功時 resolve 外層 Promise
+                    .catch(rejectOuter); // <-- 任何失敗時 reject 外層 Promise
+            });
 }
     }
+
+    // uploadImg 函數基本不變，只是確保返回 Promise
     function uploadImg(e, ms) {
         return new Promise((resolve, reject) => {
             var o = new FormData();
             o.append("image", e);
             var isImage = e.type.startsWith('image/');
-            $("#uploadButton").prop("disabled", !0);
-            $("#uploadButton").text("上传中");
-       
-     $("#loading").show();
+            // --- UI 更新部分移到外面 ---
+            // $("#uploadButton").prop("disabled", !0); 
+            // $("#uploadButton").text("上传中");
+            // $("#loading").show();
+            // --- 移出結束 ---
+
             var a = window.location.protocol + "//" + window.location.hostname;
             "80" !== window.location.port &&
                 0 < window.location.port.length &&
                 (a = a + ":" + window.location.port),
                 $.ajax({
-    
-                type: "POST",
+                    type: "POST",
                     url: a + "/api",
                     data: o,
                     contentType: !1,
-                  
-  processData: !1,
+                    processData: !1,
                     success: function (e) {
                         var link = a + e.message;
                         var t;
-                    
-    if (e.code == 1) {
-                            if (ms) {
-                                if (isImage) {
-                            
-                                    /* --- 修改開始：為圖片上傳新增「複製連結」按鈕 --- */
+                        if (e.code == 1) {
+                            if (ms) { // 只在最後一個請求 (ms=1) 時產生完整的 HTML
+                                if (isImage || e.message.endsWith('.txt')) { // 判斷是圖片或 fileAll.txt
+                                    // 圖片或分塊完成的 HTML 結構
                                     t = $(
-                                        '<div class="response-item response-success"><a target="_blank" href="' +
-                                        link +
-                                        '">' +
-                                        link +
-                                        '</a>' +
-                                        /* --- 新增的按鈕 --- */
-                                        '<span class="copy-code" data-clipboard-text="' + link + '">Copy</span>' +
-                                        /* --- 按鈕結束 --- */
-                                        '<div class="copy-links"><span class="copy-code" data-clipboard-text="&lt;img src=&quot;' +
-                                        link +
-                                        '&quot; alt=&quot;Your Alt Text&quot;&gt;">HTML</span><span class="copy-code" data-clipboard-text="![Alt Text](' +
-                                        link +
-                                        ')">Markdown</span><span class="copy-code" data-clipboard-text="[img]' +
-                                        link +
-                                        '[/img]">BBCode</span></div></div>'
+                                        '<div class="response-item response-success">' +
+                                            (e.message.endsWith('.txt') ? '分塊文件' : '图片') + // 根據是否為 .txt 顯示不同文字
+                                            '外链：<a target="_blank" href="' + link + '">' + link + '</a>' +
+                                            '<div class="all-copy-buttons">' +
+                                                '<span class="copy-code" data-clipboard-text="' + link + '">Copy</span>' + 
+                                                // 只有圖片才顯示 HTML/Markdown/BBCode
+                                                (isImage ? 
+                                                    '<span class="copy-code" data-clipboard-text="&lt;img src=&quot;' + link + '&quot; alt=&quot;Your Alt Text&quot;&gt;">HTML</span>' +
+                                                    '<span class="copy-code" data-clipboard-text="![Alt Text](' + link + ')">Markdown</span>' +
+                                                    '<span class="copy-code" data-clipboard-text="[img]' + link + '[/img]">BBCode</span>' 
+                                                    : '') + 
+                                            '</div>' +
+                                        '</div>'
                                     );
-                                    /* --- 修改結束 --- */
-
                                 } else {
-                                
-                                    /* --- 修改開始：為檔案上傳新增「複製連結」按鈕 --- */
+                                     // 普通文件（非分塊）的 HTML 結構
                                     t = $(
-                                        '<div class="response-item response-success"><a target="_blank" href="' +
-                                        link +
-                                        '">' +
-                                        link +
-                                        "</a>" +
-                                        /* --- 新增的按鈕 --- */
-                                        '<span class="copy-code" data-clipboard-text="' + link + '">Copy</span>' +
-                                        /* --- 按鈕結束 --- */
-                                        "</div>"
+                                        '<div class="response-item response-success">文件外链：<a target="_blank" href="' + link + '">' + link + '</a>' +
+                                        '<div class="all-copy-buttons">' +
+                                            '<span class="copy-code" data-clipboard-text="' + link + '">Copy</span>' +
+                                        '</div>' +
+                                        '</div>'
                                     );
-                                    /* --- 修改結束 --- */
                                 }
+                                $("#response").prepend(t); // 只有 ms=1 時才插入 DOM
+
+                                // 綁定複製按鈕事件 (移到這裡確保只綁定一次)
+                                $(".copy-code").off('click').on('click', function () { // 使用 .off().on() 防止重複綁定
+                                    var code = $(this).data("clipboard-text");
+                                    var input = $("<input>");
+                                    $("body").append(input);
+                                    input.val(code).select();
+                                    document.execCommand("copy");
+                                    input.remove();
+                                    var copyButton = $(this);
+                                    var originalText = copyButton.text();
+                                    copyButton.text("复制成功");
+                                    setTimeout(function () {
+                                        copyButton.text(originalText);
+                                    }, 1000);
+                                });
                             }
-            
-                resolve(e.message);
+                            resolve(e.message); // 無論如何都 resolve message (供 chunking 使用)
                         } else {
-                            var t = $('<div class="response-item response-error">上传失败(' + e.message + ')</div>');
-reject("上传失败(" + e.message + ")");
+                            // API 返回錯誤 code
+                            var t = $('<div class="response-item response-error">上传失败(' + (e.message || '未知错误') + ')</div>');
+                            $("#response").prepend(t); // 顯示錯誤訊息
+                            reject("上传失败(" + (e.message || '未知错误') + ")"); // Reject Promise
                         }
-                        $("#response").prepend(t);
-$("#uploadFile").val("");
-                        $("#uploadFileLabel")
-                            .text("选择文件")
-                            .css("background-color", "#12507b");
-$(".copy-code").click(function () {
-                            var code = $(this).data("clipboard-text");
-                            var input = $("<input>");
-                            $("body").append(input);
-        
-                    input.val(code).select();
-                            document.execCommand("copy");
-                            input.remove();
-                        
-    var copyButton = $(this);
-                            var originalText = copyButton.text();
-                            copyButton.text("复制成功");
-                            setTimeout(function () {
-    
-                            copyButton.text(originalText);
-                            }, 1000);
-                        });
-return e.message;
                     },
-                    error: function () {
-                        var errorResponse = $('<div class="response-item response-error">上传失败</div>');
-$("#response").prepend(errorResponse);
-                        reject("上传失败");
+                    error: function (jqXHR, textStatus, errorThrown) { // 加入更多錯誤參數
+                        // AJAX 請求本身失敗 (網路問題、後端崩潰等)
+                        var errorMsg = "上传失败";
+                        if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
+                            errorMsg += '(' + jqXHR.responseJSON.message + ')';
+                        } else if (errorThrown) {
+                             errorMsg += '(' + errorThrown + ')';
+                        }
+                        var errorResponse = $('<div class="response-item response-error">' + errorMsg + '</div>');
+                        $("#response").prepend(errorResponse);
+                        reject(errorMsg); // Reject Promise
                     },
-                    complete: function () {
-                        $("#uploadButton").prop("disabled", !1);
-$("#uploadButton").text("上传");
-                        $("#loading").hide();
-                    }
+                    // complete 回呼不再需要，由 Promise 的 finally 或 async/await 控制
+                    // complete: function () { ... } 
                 });
         });
-}
+    }
+
+    // --- 移除 readAndUploadFile 函數 ---
+    /*
     function readAndUploadFile(file) {
         var reader = new FileReader();
-reader.onload = function (e) {
-            // e.target.result 包含读取的文件内容
+        reader.onload = function (e) {
             var fileContent = e.target.result;
-// 调用上传文件的函数
-            uploadFile(file, fileContent);
+            uploadFile(file, fileContent); // fileContent 實際未使用
         };
-// 以文本形式读取文件内容
-        reader.readAsText(file);
-}
-    document.addEventListener("paste", function (e) {
-        for (var o = e.clipboardData.items, t = 0; t < o.length; t++) {
-            var a,
-                n = o[t];
-            -1 !== n.type.indexOf("image") &&
-                ((a = n.getAsFile()),
-         
-           $("#uploadFileLabel")
-                        .text("已选择剪贴板文件")
-                        .css("background-color", "#0056b3"),
-                    uploadFile(a));
-        }
-    }),
-        
-$(document).ready(function () {
+        reader.readAsText(file); // 對二進制文件使用 readAsText 是錯誤的
+    }
+    */
+   // --- 移除結束 ---
 
-            /* --- 新增：動態載入背景圖片 --- */
-            // 1. 獲取當前時間作為隨機數 (用來破壞快取)
+    document.addEventListener("paste", function (e) {
+        // --- 修改：貼上時也使用 async/await ---
+        (async () => { 
+            $("#uploadButton").prop("disabled", true); // 禁用按鈕
+            $("#uploadButton").text("上传中");
+            $("#loading").show();
+            var filesToUpload = [];
+            for (var o = e.clipboardData.items, t = 0; t < o.length; t++) {
+                var n = o[t];
+                if (n.type.indexOf("image") !== -1) {
+                   filesToUpload.push(n.getAsFile());
+                }
+            }
+
+            if (filesToUpload.length > 0) {
+                 $("#uploadFileLabel")
+                        .text("已选择剪贴板文件 ("+ filesToUpload.length +")")
+                        .css("background-color", "#0056b3");
+                for (const file of filesToUpload) {
+                    try {
+                        await uploadFile(file); // 等待上傳完成
+                    } catch (error) {
+                        console.error("Paste upload error for one file:", error);
+                        // 即使一個文件失敗，也繼續嘗試下一個
+                    }
+                }
+                 $("#uploadFileLabel") // 清除選擇提示
+                    .text("选择文件")
+                    .css("background-color", "#12507b");
+            }
+
+            $("#uploadButton").prop("disabled", false); // 啟用按鈕
+            $("#uploadButton").text("上传");
+            $("#loading").hide();
+        })(); // 立即執行 async 函數
+        // --- 修改結束 ---
+    });
+        
+    $(document).ready(function () {
+            /* --- 動態載入背景圖片 (不變) --- */
             var cacheBuster = new Date().getTime();
-            // 2. 組合新的 URL
             var newBgUrl = 'https://www.loliapi.com/acg/?_t=' + cacheBuster;
-            // 3. 用 jQuery 把這個 URL 設置為 body 的背景
             $('body').css('background-image', 'url(' + newBgUrl + ')');
             /* --- 新增結束 --- */
 
@@ -214,34 +224,75 @@ $(document).ready(function () {
                 var files = $(this)[0].files;
                 if (files.length > 0) {
                     if (files.length === 1) {
-                     
-   $("#uploadFileLabel")
+                         $("#uploadFileLabel")
                             .text("已选择文件: " + files[0].name)
                             .css("background-color", "#0056b3");
                     } else {
-               
-         $("#uploadFileLabel")
-                            .text("已选择多个文件")
+                         $("#uploadFileLabel")
+                            .text("已选择 " + files.length + " 个文件") // <-- 修改提示文字
                             .css("background-color", "#0056b3");
-}
+                    }
                 } else {
                     $("#uploadFileLabel")
                         .text("选择文件")
                         .css("background-color", "#12507b");
-}
+                }
             });
-$("#uploadButton").click(function () {
+
+            // --- 修改 uploadButton 點擊事件為 async ---
+            $("#uploadButton").click(async function () { // <-- 設為 async 函數
                 var input = document.getElementById("uploadFile");
-                if (input.files.length > 0) {
-                    for (var i = 0; i < input.files.length; i++) {
-                        readAndUploadFile(input.files[i]);
-      
-              }
+                var files = input.files; // <-- 取得 FileList
+
+                if (files.length > 0) {
+                    // --- 在迴圈外禁用按鈕 ---
+                    $("#uploadButton").prop("disabled", true);
+                    $("#uploadButton").text("上传中 (" + files.length + ")"); // <-- 顯示總數
+                    $("#loading").show();
+                    // --- 禁用結束 ---
+
+                    var successCount = 0;
+                    var errorCount = 0;
+
+                    // 使用 for...of 迴圈配合 await
+                    for (const file of files) { 
+                        try {
+                            // 等待 uploadFile Promise 完成
+                            await uploadFile(file); 
+                            successCount++;
+                        } catch (error) {
+                            console.error("Upload error for file " + file.name + ":", error);
+                            errorCount++;
+                            // 錯誤訊息已由 uploadImg 或 uploadFile 內部 prepend
+                        }
+                        // 更新按鈕文字顯示進度 (可選)
+                        $("#uploadButton").text("上传中 (" + (files.length - successCount - errorCount) + ")");
+                    }
+
+                    // --- 所有文件處理完畢後啟用按鈕 ---
+                    $("#uploadButton").prop("disabled", false);
+                    $("#uploadButton").text("上传");
+                    $("#loading").hide();
+                    $("#uploadFile").val(""); // 清空選擇的文件
+                    $("#uploadFileLabel")
+                        .text("选择文件")
+                        .css("background-color", "#12507b");
+                    // --- 啟用結束 ---
+                    
+                    // (可選) 顯示一個總結訊息
+                    if (files.length > 1) {
+                         var summaryMsg = "批量上传完成: " + successCount + " 成功, " + errorCount + " 失败。";
+                         var summaryClass = errorCount > 0 ? "response-error" : "response-success";
+                         var summaryDiv = $('<div class="response-item ' + summaryClass + '">' + summaryMsg + '</div>');
+                         $("#response").prepend(summaryDiv);
+                    }
+
                 } else {
                     alert("请选择一个文件");
                 }
             });
-});
+            // --- 修改結束 ---
+    });
 </script>
 </body>
 
