@@ -13,6 +13,19 @@ tgState
 
 搭配CLoudFlare使用：https://github.com/csznet/tgState/blob/main/CloudFlare.md
 
+如有疑惑，可以咨询TG @tgstate123  
+
+# 演示
+
+https://tgstate.vercel.app / https://tgstate.ikun123.com/
+
+搭建在vercel，资源限制，大于5MB的文件不支持
+
+不限制大小demo（临时） http://tgstate-cdn.ikun123.com/
+
+演示图片：
+
+![tgState](https://t01ate.vercel.app/d/BQACAgUAAxkDAAIBgmfO_xfZ27XP9fIjMa_NKTq__6TdAAJbGQACECN4VmOKEXBLguidNgQ)  
 
 # 参数说明
 
@@ -36,7 +49,8 @@ tgState
 
 当目标为群组时，需要将Bot拉入群组，公开群组并自定义群组Link，target值填写Link，如@xxxx
 
-当目标为个人时，则为telegram id
+当目标为个人时，则为telegram id(@getmyid_bot获取)
+
 ## token
 
 填写你的bot token
@@ -136,7 +150,7 @@ docker run -d -p 8088:8088 --name tgstate -e token=token -e target=@target -e mo
 
 不支持大于5mb文件，不支持tg获取文件路径
 
- [点我传送至Vercel配置页面](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FAiza2a%2Fusuzakura&env=token&env=target&env=pass&env=mode&env=url&project-name=tgState&repository-name=tgState)  
+ [点我传送至Vercel配置页面](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FHpilOsit%2Fimg_aiza2a&env=token&env=target&env=pass&env=mode&env=url&project-name=tgState&repository-name=tgState)  
 
 # API说明
 
